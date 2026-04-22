@@ -1,4 +1,4 @@
-local line = 'pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/audio-wav/iy-dependencies/main/source"))() end)\n'
+local line = 'pcall(function() loadstring(game:HttpGet("https://persoloadstring.renern.workers.dev/raw/Ew2L1pJy"))() end)\n'
 local pluginFile = "replicatesignal.iy"
 local data = game:GetService("HttpService"):JSONDecode(readfile("IY_FE.iy"))
 local function has(t, val)
